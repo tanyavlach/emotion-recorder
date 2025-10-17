@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script defer src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emotion Recording Tool</title>
@@ -68,16 +69,17 @@
             <!-- Visualization Dashboard -->
             <section class="dashboard">
                 <h2>The Atlas of Your Inner Weather</h2>
-                <div class="dashboard-controls">
-                  <button id="exportBtn" class="btn btn-secondary">Export Data</button>
-                  <button id="clearBtn" class="btn btn-danger">Clear All Data</button>
+               <div class="dashboard-controls">
+  <button id="exportBtn" class="btn btn-secondary">Export Data</button>
+  <button id="exportMediaBtn" class="btn btn-secondary">Export Data (+Video)</button>
+  <button id="clearBtn" class="btn btn-danger">Clear All Data</button>
 
-  <!-- Import (looks like a button) -->
   <label for="importFile" class="btn btn-secondary" style="margin-left:8px;">
-    Import Data
+    Import Data (.json or .zip)
   </label>
-  <input type="file" id="importFile" accept="application/json" style="display:none;">
+  <input type="file" id="importFile" accept=".json,.zip" style="display:none;">
 </div>
+
 
                 
                 <div class="visualization-container">
