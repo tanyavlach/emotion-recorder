@@ -167,60 +167,88 @@ class StorageManager {
 
 // Create global instance
 const storage = new StorageManager();
-/* -----------------------------------------
-   DATA MANAGEMENT: EXPORT / IMPORT / CLEAR
-------------------------------------------*/
+// ===== DATA MANAGEMENT (IndexedDB-aware) =====
 
-// ---- EXPORT ----
-function exportAllToJson() {
-  const dump = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    dump[key] = localStorage.getItem(key);
+// Ensure the DB is ready before wiring UI
+(async () => {
+  try {
+    await storage.init();
+  } catch (e) {
+    console.error('Failed to init storage:', e);
   }
 
-  const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'emotion-recorder-export.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
+  // EXPORT: use your existing exportData() + downloadAsJSON()
+  const exportBtn = document.getElementById('exportBtn');
+  exportBtn?.addEventListener('click', async () => {
+    try {
+      const payload = await storage.exportData(); // { exportDate, totalCaptures, captures: [...] }
+      storage.downloadAsJSON(payload, 'emotion-recorder-export.json');
+    } catch (e) {
+      console.error(e);
+      alert('Export failed. See console for details.');
+    }
+  });
 
-document.getElementById('exportBtn')?.addEventListener('click', exportAllToJson);
+  // CLEAR: use your deleteAllCaptures()
+  const clearBtn = document.getElementById('clearBtn');
+  clearBtn?.addEventListener('click', async () => {
+    if (!confirm('Delete all saved data? This cannot be undone.')) return;
+    try {
+      await storage.deleteAllCaptures();
+      location.reload();
+    } catch (e) {
+      console.error(e);
+      alert('Clear failed. See console for details.');
+    }
+  });
 
-// ---- CLEAR ----
-document.getElementById('clearBtn')?.addEventListener('click', () => {
-  if (confirm('Delete all saved data? This cannot be undone.')) {
-    localStorage.clear();
+  // IMPORT: read JSON, accept {captures:[...]} or a raw array [...],
+  // strip ids (to avoid collisions), and save via saveCapture()
+  const importEl = document.getElementById('importFile');
+
+  async function importFromJsonFile(file) {
+    const text = await file.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      alert('Import failed: invalid JSON.');
+      return;
+    }
+
+    const captures =
+      Array.isArray(data)            ? data :
+      Array.isArray(data?.captures)  ? data.captures :
+      [];
+
+    if (!Array.isArray(captures) || captures.length === 0) {
+      alert('Import file has no captures to import.');
+      return;
+    }
+
+    // Save each capture. Remove id to let IndexedDB assign new ones.
+    for (const raw of captures) {
+      const cap = { ...raw };
+      delete cap.id;
+
+      // Blobs can’t be represented in JSON; if present, ignore or set null
+      if (cap.videoBlob && typeof cap.videoBlob !== 'string') {
+        cap.videoBlob = null;
+      }
+
+      // Preserve original timestamp if present. Your saveCapture spreads
+      // captureData AFTER a default timestamp, so the original will win.
+      await storage.saveCapture(cap);
+    }
+
+    alert('Import complete. Reloading…');
     location.reload();
   }
-});
 
-// ---- IMPORT ----
-async function importFromJsonFile(file) {
-  const text = await file.text();
-  let data;
+  importEl?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) importFromJsonFile(file);
+  });
+})();
 
-  try {
-    data = JSON.parse(text);
-  } catch (err) {
-    alert('Import failed: invalid JSON.');
-    return;
-  }
-
-  // Store every key/value pair from the imported JSON
-  for (const [key, value] of Object.entries(data)) {
-    localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
-  }
-
-  alert('Import complete! Reloading...');
-  location.reload();
-}
-
-document.getElementById('importFile')?.addEventListener('change', (e) => {
-  const file = e.target.files?.[0];
-  if (file) importFromJsonFile(file);
-});
-
+  
