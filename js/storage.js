@@ -167,3 +167,60 @@ class StorageManager {
 
 // Create global instance
 const storage = new StorageManager();
+/* -----------------------------------------
+   DATA MANAGEMENT: EXPORT / IMPORT / CLEAR
+------------------------------------------*/
+
+// ---- EXPORT ----
+function exportAllToJson() {
+  const dump = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    dump[key] = localStorage.getItem(key);
+  }
+
+  const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'emotion-recorder-export.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportBtn')?.addEventListener('click', exportAllToJson);
+
+// ---- CLEAR ----
+document.getElementById('clearBtn')?.addEventListener('click', () => {
+  if (confirm('Delete all saved data? This cannot be undone.')) {
+    localStorage.clear();
+    location.reload();
+  }
+});
+
+// ---- IMPORT ----
+async function importFromJsonFile(file) {
+  const text = await file.text();
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    alert('Import failed: invalid JSON.');
+    return;
+  }
+
+  // Store every key/value pair from the imported JSON
+  for (const [key, value] of Object.entries(data)) {
+    localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+  }
+
+  alert('Import complete! Reloading...');
+  location.reload();
+}
+
+document.getElementById('importFile')?.addEventListener('change', (e) => {
+  const file = e.target.files?.[0];
+  if (file) importFromJsonFile(file);
+});
+
