@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Recording Tool</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>The Emotional Cartographer</h1>
+            <p class="subtitle">Mapping the archipelago of feeling, one moment at a time</p>
+        </header>
+
+        <main>
+            <!-- Control Panel -->
+            <section class="control-panel">
+                <div class="theme-toggle-container">
+                    <button id="themeToggle" class="btn-theme-toggle">
+                        <span class="theme-icon">◐</span> X-Ray Mode
+                    </button>
+                    <button id="soundToggle" class="btn-theme-toggle" style="margin-left: 10px;">
+                        <span class="sound-icon">🔔</span> Sound
+                    </button>
+                </div>
+                <div class="timer-display">
+                    <div class="timer-label">Next moment of reflection:</div>
+                    <div class="timer-countdown" id="countdown">5:00</div>
+                </div>
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-primary">Start</button>
+                    <button id="pauseBtn" class="btn btn-secondary" disabled>Pause</button>
+                    <button id="stopBtn" class="btn btn-danger" disabled>Stop</button>
+                </div>
+                <div class="status" id="status">Ready to begin</div>
+            </section>
+
+            <!-- Recording Section -->
+            <section class="recording-section" id="recordingSection" style="display: none;">
+                <div class="video-container">
+                    <video id="videoPreview" autoplay muted></video>
+                    <div class="recording-timer" id="recordingTimer">30</div>
+                    <div class="recording-indicator">● RECORDING</div>
+                </div>
+                <div class="transcript-container">
+                    <h3>Words Captured in Time</h3>
+                    <div id="transcript" class="transcript-text">Listening to your voice...</div>
+                </div>
+            </section>
+
+            <!-- Emotion Input Section -->
+            <section class="emotion-input-section" id="emotionSection" style="display: none;">
+                <h2>What color is this moment?</h2>
+                <div class="emotion-input-container">
+                    <div class="emotion-wheel-container">
+                        <canvas id="emotionWheel" width="400" height="400"></canvas>
+                        <div id="selectedEmotion" class="selected-emotion"></div>
+                    </div>
+                    <div class="emotion-text-input">
+                        <label for="emotionWord">Name this feeling:</label>
+                        <input type="text" id="emotionWord" placeholder="whisper a word... joyful, melancholy, electric...">
+                        <button id="submitEmotion" class="btn btn-primary">Preserve This Moment</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Visualization Dashboard -->
+            <section class="dashboard">
+                <h2>The Atlas of Your Inner Weather</h2>
+                <div class="dashboard-controls">
+                    <button id="exportBtn" class="btn btn-secondary">Export Data</button>
+                    <button id="clearBtn" class="btn btn-danger">Clear All Data</button>
+                </div>
+                
+                <div class="visualization-container">
+                    <div class="emotion-trace">
+                        <h3>The Path You've Traveled</h3>
+                        <canvas id="traceWheel" width="500" height="500"></canvas>
+                    </div>
+                    
+                    <div class="timeline">
+                        <h3>Moments Remembered</h3>
+                        <div id="timelineList" class="timeline-list"></div>
+                    </div>
+                </div>
+
+                <div class="statistics">
+                    <h3>Patterns in the Tapestry</h3>
+                    <div id="stats" class="stats-grid"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/soundManager.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/emotionWheel.js"></script>
+    <script src="js/transcription.js"></script>
+    <script src="js/recorder.js"></script>
+    <script src="js/visualization.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
